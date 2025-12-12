@@ -36,7 +36,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
     Node** nodes = new Node * [height];
 
     // Инициализация поля и значений узлов
-    for (int i = 0; i < width; i++)
+    for (int i = 0; i < height; i++)
     {
         // Выделяем строки
         closed[i] = new bool[width];
@@ -44,7 +44,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
         nodes[i] = new Node[width];
 
         // Заполнение значений
-        for (int j = 0; j < height; j++)
+        for (int j = 0; j < width; j++)
         {
             closed[i][j] = false;
             gcost[i][j] = 1000000000;
@@ -138,7 +138,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
                 gcost[neighbourX][neighbourY] = currentG;
                 nodes[neighbourX][neighbourY].g = currentG;
                 nodes[neighbourX][neighbourY].f = currentG + DistanceToCell(neighbourX, neighbourY, end.x, end.y);
-                nodes[neighbourX][neighbourY].parent = nodes[currentX][currentY];
+                nodes[neighbourX][neighbourY].parent = &nodes[currentX][currentY];
 
                 // Обновляем открытые списки
                 openX[openCount] = neighbourX;
@@ -149,6 +149,49 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
             }
         }
     }
+
+    Cell* path = NULL;
+    // Если путь найден,восстанавливаем его по предыдущим узлам
+    if (endFound)
+    {
+        cout << "Путь построен!" << endl;
+        Node* currentNode = &nodes[end.x][end.y]; // текущий узел на момент нахождения конца
+        int pathLength = 0;
+        //Подсчитываем сколько узлов потребовалось для нахождения цели
+        while (currentNode != NULL)
+        {
+            pathLength++;
+            currentNode = currentNode->parent;
+        }
+        // Создаем массив клеток с размером пути
+        path = new Cell[pathLength];
+        currentNode = &nodes[end.x][end.y];
+        // Строим массив клеток в обратном порядке
+        for (int i = pathLength - 1; i >= 0; i--)
+        {
+            path[i].x = currentNode->x;
+            path[i].y = currentNode->y;
+            currentNode = currentNode->parent;
+        }
+    }
+
+    // Высвобождение памяти под 
+    for (int i = 0; i < height; i++)
+    {
+        // поскольку мы работаем с массивом указателей на указатели, сперва необъодимо очистить память у строк, а затем и у самого массива
+        delete[] closed[i];
+        delete[] gcost[i];
+        delete[] nodes[i];
+    }
+    delete[] closed;
+    delete[] gcost;
+    delete[] nodes;
+    delete[] openX;
+    delete[] openY;
+    delete[] openF;
+    delete[] openG;
+
+    return path;
 }
 
 int main()
@@ -181,12 +224,12 @@ int main()
     end.y = 4;
 
     int pathLength = 0;
-    Cell path = AStarSearch();
+    Cell* path = AStarSearch(map, height, width, start, end);
 
     if (path != NULL)
     {
-        PrintMap();
-        delete[path];
+        //PrintMap();
+        delete[] path;
     }
     else cout << "Не удалось построить пути к цели!\n";
 }
