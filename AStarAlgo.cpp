@@ -27,7 +27,7 @@ int DistanceToCell(int x1, int y1, int x2, int y2)
 }
 
 // A* алгоритм, который возвращает указатель на клетку, которую мы ищем
-Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
+Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int &pathLength)
 {
     // массив указателей на доступность узла
     bool** closed = new bool* [height]; // указываем строками на столбцы
@@ -194,6 +194,25 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end)
     return path;
 }
 
+void PrintMap(string* map, int height, int width, Cell* path, Cell start, Cell end, int pathLength)
+{
+    string* mapCopy = new string[height];
+
+    for (int i = 0; i < height; i++) mapCopy[i] = map[i];
+
+    for (int i = 1; i + 1 < pathLength; i++) mapCopy[path[i].x][path[i].y] = '*';
+
+    mapCopy[start.x][start.y] = 'S';
+    mapCopy[end.x][end.y] = 'G';
+
+    for (int i = 0; i < mapCopy->size(); i++)
+    {
+        cout << mapCopy[i] << endl;
+    }
+
+    delete[] mapCopy;
+}
+
 int main()
 {
     setlocale(LC_ALL, "");
@@ -202,9 +221,11 @@ int main()
 
     string map[] =
     {
-        // ALT+0183
         // · - пустая клетка
-        // ■ - стена
+        // + - стена
+        // * - путь
+        // S - старт
+        // G - конец
         "···+·",
         "++·+·",
         "·····",
@@ -224,11 +245,13 @@ int main()
     end.y = 4;
 
     int pathLength = 0;
-    Cell* path = AStarSearch(map, height, width, start, end);
+    Cell* path = AStarSearch(map, height, width, start, end, pathLength);
 
     if (path != NULL)
     {
-        //PrintMap();
+        PrintMap(map, height, width, path, start, end, pathLength);
+        cout << pathLength << endl;
+        cout << path->x << " - " << path->y << endl;
         delete[] path;
     }
     else cout << "Не удалось построить пути к цели!\n";
