@@ -156,7 +156,7 @@ Cell* AStarSearch(string* map, int height, int width, Cell start, Cell end, int 
     {
         cout << "Путь построен!" << endl;
         Node* currentNode = &nodes[end.x][end.y]; // текущий узел на момент нахождения конца
-        int pathLength = 0;
+        pathLength = 0;
         //Подсчитываем сколько узлов потребовалось для нахождения цели
         while (currentNode != NULL)
         {
