@@ -200,12 +200,15 @@ void PrintMap(string* map, int height, int width, Cell* path, Cell start, Cell e
 
     for (int i = 0; i < height; i++) mapCopy[i] = map[i];
 
-    for (int i = 1; i + 1 < pathLength; i++) mapCopy[path[i].x][path[i].y] = '*';
+    if (path != NULL)
+    {
+        for (int i = 1; i + 1 < pathLength; i++) mapCopy[path[i].x][path[i].y] = '*';
+    }
 
     mapCopy[start.x][start.y] = 'S';
     mapCopy[end.x][end.y] = 'G';
 
-    for (int i = 0; i < mapCopy->size(); i++)
+    for (int i = 0; i < height; i++)
     {
         cout << mapCopy[i] << endl;
     }
@@ -228,7 +231,7 @@ int main()
         // G - конец
         "···+·",
         "++·+·",
-        "·····",
+        "···+·",
         "·+++·",
         "·····"
     };
@@ -244,15 +247,48 @@ int main()
     end.x = 4;
     end.y = 4;
 
-    int pathLength = 0;
-    Cell* path = AStarSearch(map, height, width, start, end, pathLength);
-
-    if (path != NULL)
+    // Каждый цикл мы вызываем функцию AStarSearch, которая возвращает набор клеток, по которым может передвигаться объект. После вызова этой функции переменная pathLength задается длиной пути, которую надо пройти
+    // Пока координаты начальной точки НЕ равняются координатам конечной точки
+    // while (!(start.x == end.x && start.y == end.y))
+    while (!(start.x == end.x && start.y == end.y))
     {
-        PrintMap(map, height, width, path, start, end, pathLength);
-        cout << pathLength << endl;
-        cout << path->x << " - " << path->y << endl;
-        delete[] path;
+        int pathLength = 0;
+        Cell* path = AStarSearch(map, height, width, start, end, pathLength);
+
+        if (path != NULL)
+        {
+            PrintMap(map, height, width, path, start, end, pathLength);
+            
+            // Если длина пути больше двух, объект перемещается на следующий индекс набор клеток (первый)
+            if (pathLength >= 2)
+            {
+                start.x = path[1].x;
+                start.y = path[1].y;
+            }
+            else
+            {
+                start = end;
+                /**/
+            }
+
+            delete[] path;
+        }
+        else
+        {
+            cout << "Не удалось построить пути к цели!\n";
+            break;
+        }
+
+        Sleep(300);
+        system("cls");
     }
-    else cout << "Не удалось построить пути к цели!\n";
+
+    if (start.x == end.x && start.y == end.y)
+    {
+        int pathLength = 0;
+        Cell* path = AStarSearch(map, height, width, start, end, pathLength);
+        PrintMap(map, height, width, path, start, end, pathLength);
+        cout << "Враг пимав вас!" << endl;
+        // ИНИЦИАЛИЗАЦИЯ БОЯ
+    }
 }
